@@ -1,0 +1,152 @@
+[
+  {
+    "item": "CASCO COMPLETO",
+    "talla": null,
+    "cantidad": 30
+  },
+  {
+    "item": "PRIMERA CAPA",
+    "talla": "L",
+    "cantidad": 17
+  },
+  {
+    "item": "CHAQUETA 3 CAPAS",
+    "talla": "S",
+    "cantidad": null
+  },
+  {
+    "item": "CHAQUETA 3 CAPAS",
+    "talla": "M",
+    "cantidad": 1
+  },
+  {
+    "item": "CHAQUETA 3 CAPAS",
+    "talla": "L",
+    "cantidad": 3
+  },
+  {
+    "item": "CHAQUETA 3 CAPAS",
+    "talla": "XL",
+    "cantidad": 1
+  },
+  {
+    "item": "LEGIONARIOS",
+    "talla": null,
+    "cantidad": 50
+  },
+  {
+    "item": "BALANCLAVA",
+    "talla": null,
+    "cantidad": 50
+  },
+  {
+    "item": "GEOLOGO",
+    "talla": "S",
+    "cantidad": 24
+  },
+  {
+    "item": "GEOLOGO ",
+    "talla": "M",
+    "cantidad": 22
+  },
+  {
+    "item": "GEOLOGO ",
+    "talla": "L",
+    "cantidad": 20
+  },
+  {
+    "item": "GEOLOGO",
+    "talla": "XL",
+    "cantidad": 21
+  },
+  {
+    "item": "PROTECTOR SOLAR",
+    "talla": null,
+    "cantidad": 25
+  },
+  {
+    "item": "GUANTES ",
+    "talla": "L",
+    "cantidad": 90
+  },
+  {
+    "item": "PRIMERA CAPA",
+    "talla": "XL",
+    "cantidad": 17
+  },
+  {
+    "item": "PRIMERA CAPA",
+    "talla": "S",
+    "cantidad": 4
+  },
+  {
+    "item": "PRIMERA CAPA",
+    "talla": "M",
+    "cantidad": 15
+  },
+  {
+    "item": "POLERA",
+    "talla": "S",
+    "cantidad": 5
+  },
+  {
+    "item": "POLERA",
+    "talla": "M",
+    "cantidad": 9
+  },
+  {
+    "item": "POLERA",
+    "talla": "L",
+    "cantidad": 1
+  },
+  {
+    "item": "POLERA",
+    "talla": "XL",
+    "cantidad": 1
+  },
+  {
+    "item": "PANTALON",
+    "talla": 42,
+    "cantidad": 3
+  },
+  {
+    "item": "PANTALON",
+    "talla": 44,
+    "cantidad": 9
+  },
+  {
+    "item": "PANTALON",
+    "talla": 46,
+    "cantidad": 3
+  },
+  {
+    "item": "PANTALON",
+    "talla": 52,
+    "cantidad": 5
+  },
+  {
+    "item": "PANTALON",
+    "talla": 54,
+    "cantidad": 7
+  },
+  {
+    "item": "PANTALON",
+    "talla": 56,
+    "cantidad": 6
+  },
+  {
+    "item": "PANTALON",
+    "talla": 58,
+    "cantidad": 2
+  },
+  {
+    "item": "LENTES BLANCOS",
+    "talla": null,
+    "cantidad": 49
+  },
+  {
+    "item": "LENTES NEGROS",
+    "talla": null,
+    "cantidad": 43
+  }
+]

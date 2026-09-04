@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EDA Logística">
+<meta name="theme-color" content="#0d1117">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="manifest" href="manifest.json" crossorigin="use-credentials">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="EDA Logística">
+<title>EDA · Logística e Inventario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://firestore.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
+<style>
+/* ── TOKENS (mismo lenguaje visual que SANTERRA) ─────────────────── */
+:root{
+  --bg:#07080d;--sf:rgba(255,255,255,.055);--sf2:rgba(255,255,255,.038);--sf3:rgba(255,255,255,.022);
+  --bd:rgba(255,255,255,.16);--bd2:rgba(255,255,255,.10);--bd3:rgba(255,255,255,.055);
+  --accent:#4f8ef7;--accd:rgba(79,142,247,.14);--accb:rgba(79,142,247,.32);
+  --blue:#4f8ef7;--blued:rgba(79,142,247,.14);--blueb:rgba(79,142,247,.32);
+  --green:#00c98d;--greend:rgba(0,201,141,.14);--greenb:rgba(0,201,141,.32);
+  --yellow:#ffb800;--yellowd:rgba(255,184,0,.14);--yellowb:rgba(255,184,0,.32);
+  --red:#ff4444;--redd:rgba(255,68,68,.14);--redb:rgba(255,68,68,.32);
+  --purple:#a78bfa;--purpled:rgba(167,139,250,.14);--purpleb:rgba(167,139,250,.32);
+  --orange:#ff7849;--oranged:rgba(255,120,73,.14);--orangeb:rgba(255,120,73,.32);
+  --tx:#eef2ff;--txm:#7b8499;--txd:#363c4e;
+  --r:16px;
+  --glass-blur:blur(20px) saturate(150%);
+  --glass-blur-sm:blur(14px) saturate(140%);
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+  --sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;min-height:100vh;min-height:100dvh}
+body{font-family:'DM Sans',sans-serif;color:var(--tx);background:var(--bg);overflow-x:hidden;
+  background-image:radial-gradient(circle at 20% 0%, rgba(79,142,247,.08), transparent 40%),
+                    radial-gradient(circle at 80% 100%, rgba(0,201,141,.06), transparent 45%);}
+h1,h2,h3,.num{font-family:'Inter',sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;color:var(--tx);background:var(--sf2);border:1px solid var(--bd2);
+  border-radius:10px;padding:11px 13px;font-size:15px;width:100%;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accb);background:var(--sf)}
+::placeholder{color:var(--txm)}
+.hide{display:none!important}
+
+/* ── LOGIN / PIN ─────────────────────────────────────────────────── */
+#loginView{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;flex-direction:column;gap:24px}
+.brand{text-align:center}
+.brand h1{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.brand p{color:var(--txm);font-size:13px;margin-top:4px}
+.pin-grid{display:grid;grid-template-columns:repeat(3,64px);gap:12px}
+.pin-key{width:64px;height:64px;border-radius:50%;background:var(--sf2);border:1px solid var(--bd2);
+  font-size:22px;font-weight:600;display:flex;align-items:center;justify-content:center;backdrop-filter:var(--glass-blur-sm)}
+.pin-key:active{background:var(--sf);transform:scale(.95)}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin:6px 0}
+.pin-dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--bd);transition:.15s}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pin-error{color:var(--red);font-size:13px;height:16px}
+.profile-pick{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.profile-chip{padding:10px 18px;border-radius:999px;background:var(--sf2);border:1px solid var(--bd2);font-size:14px;font-weight:600}
+.profile-chip.active{background:var(--accd);border-color:var(--accb);color:var(--accent)}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────── */
+#appView{min-height:100dvh;padding-bottom:calc(78px + var(--sb))}
+header.top{position:sticky;top:0;z-index:40;padding:calc(14px + var(--st)) 18px 14px;
+  background:rgba(7,8,13,.75);backdrop-filter:var(--glass-blur);border-bottom:1px solid var(--bd3);
+  display:flex;align-items:center;justify-content:space-between}
+header.top h2{font-size:17px;font-weight:800}
+header.top .who{font-size:12px;color:var(--txm)}
+main{padding:16px 16px 8px;max-width:820px;margin:0 auto}
+
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;
+  padding:8px calc(10px + var(--sl)) calc(8px + var(--sb)) calc(10px + var(--sr));
+  background:rgba(7,8,13,.85);backdrop-filter:var(--glass-blur);border-top:1px solid var(--bd3)}
+nav.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;
+  font-size:11px;color:var(--txm);border-radius:12px}
+nav.tabbar button.active{color:var(--accent)}
+nav.tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+.card{background:var(--sf2);border:1px solid var(--bd3);border-radius:var(--r);padding:16px;margin-bottom:12px;
+  backdrop-filter:var(--glass-blur-sm)}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--sf2);border:1px solid var(--bd3);border-radius:14px;padding:14px}
+.stat .num{font-size:24px;font-weight:800}
+.stat .lbl{font-size:12px;color:var(--txm);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.badge.green{background:var(--greend);color:var(--green)}
+.badge.red{background:var(--redd);color:var(--red)}
+.badge.yellow{background:var(--yellowd);color:var(--yellow)}
+.badge.blue{background:var(--blued);color:var(--blue)}
+.badge.purple{background:var(--purpled);color:var(--purple)}
+
+.searchbar{display:flex;gap:8px;margin-bottom:12px}
+.searchbar input{flex:1}
+.filter-row{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+.filter-chip{white-space:nowrap;padding:7px 13px;border-radius:999px;background:var(--sf2);border:1px solid var(--bd2);font-size:12.5px;color:var(--txm)}
+.filter-chip.active{background:var(--accd);border-color:var(--accb);color:var(--accent)}
+
+.eq-row{display:flex;align-items:center;justify-content:space-between;padding:13px 4px;border-bottom:1px solid var(--bd3);gap:10px}
+.eq-row:last-child{border-bottom:none}
+.eq-main .cod{font-size:12px;color:var(--txm);font-weight:600}
+.eq-main .nom{font-size:14.5px;font-weight:600;margin-top:1px}
+.eq-main .sub{font-size:12px;color:var(--txm);margin-top:2px}
+.eq-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+
+.fab{position:fixed;right:calc(18px + var(--sr));bottom:calc(92px + var(--sb));z-index:45;width:54px;height:54px;
+  border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(79,142,247,.4);font-size:26px}
+
+/* ── MODAL/SHEET ─────────────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:90dvh;overflow-y:auto;background:#0d0f18;border:1px solid var(--bd2);
+  border-radius:22px 22px 0 0;padding:20px 18px calc(24px + var(--sb));animation:up .2s ease}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sheet h3{font-size:17px;font-weight:800;margin-bottom:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--txm);margin-bottom:5px;font-weight:600}
+.btn{padding:12px 18px;border-radius:12px;font-weight:700;font-size:14px;text-align:center}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{background:var(--sf2);border:1px solid var(--bd2);color:var(--tx)}
+.btn.danger{background:var(--redd);color:var(--red)}
+.btn-row{display:flex;gap:10px;margin-top:16px}
+.btn-row .btn{flex:1}
+.seg{display:flex;background:var(--sf2);border:1px solid var(--bd2);border-radius:12px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:600;color:var(--txm)}
+.seg button.active{background:var(--accent);color:#fff}
+
+.toast{position:fixed;left:50%;bottom:calc(96px + var(--sb));transform:translateX(-50%);z-index:200;
+  background:#1a1d29;border:1px solid var(--bd2);padding:11px 20px;border-radius:12px;font-size:13.5px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);opacity:0;transition:.2s}
+.toast.show{opacity:1}
+.empty{text-align:center;padding:40px 20px;color:var(--txm);font-size:13.5px}
+.loading{text-align:center;padding:40px;color:var(--txm)}
+.hist-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd3);font-size:13px}
+.hist-item:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginView">
+  <div class="brand">
+    <h1>EDA · Logística</h1>
+    <p>Inventario y control de equipos técnicos</p>
+  </div>
+  <div id="profilePick" class="profile-pick"></div>
+  <div id="pinArea" class="hide" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-grid" id="pinGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="appView" class="hide">
+  <header class="top">
+    <div>
+      <h2 id="viewTitle">Equipos</h2>
+      <div class="who" id="whoLabel"></div>
+    </div>
+    <button id="logoutBtn" style="font-size:12px;color:var(--txm);border:1px solid var(--bd2);padding:7px 12px;border-radius:10px">Salir</button>
+  </header>
+
+  <main>
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="hide">
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="card">
+        <h3 style="font-size:14px;margin-bottom:10px">Movimientos recientes</h3>
+        <div id="recentMovs"></div>
+      </div>
+    </section>
+
+    <!-- EQUIPOS -->
+    <section id="view-equipos" class="hide">
+      <div class="searchbar">
+        <input id="eqSearch" placeholder="Buscar por código, nombre o serie…">
+      </div>
+      <div class="filter-row" id="familiaFilters"></div>
+      <div class="filter-row" id="dispoFilters"></div>
+      <div class="card" style="padding:6px 12px">
+        <div id="equiposList"></div>
+      </div>
+    </section>
+
+    <!-- GUÍAS DE DESPACHO -->
+    <section id="view-guias" class="hide">
+      <div class="filter-row" id="guiaTipoFilters"></div>
+      <div class="filter-row" id="guiaEstadoFilters"></div>
+      <div class="card" style="padding:6px 12px">
+        <div id="guiasList"></div>
+      </div>
+    </section>
+
+    <!-- FACTURAS -->
+    <section id="view-facturas" class="hide">
+      <div class="filter-row" id="facturaEstadoFilters"></div>
+      <div class="card" style="padding:6px 12px">
+        <div id="facturasList"></div>
+      </div>
+    </section>
+
+    <!-- REPORTES -->
+    <section id="view-reportes" class="hide">
+      <div class="card">
+        <h3 style="font-size:14px;margin-bottom:12px">Exportar</h3>
+        <div class="btn-row" style="margin-top:0">
+          <button class="btn primary" id="exportEquiposBtn">Exportar Equipos (.csv)</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="exportGuiasBtn">Exportar Guías de Despacho (.csv)</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="exportFacturasBtn">Exportar Facturas (.csv)</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;margin-bottom:10px">Certificación de calibración</h3>
+        <div id="certList"></div>
+      </div>
+    </section>
+  </main>
+
+  <button class="fab hide" id="fabAdd">+</button>
+
+  <nav class="tabbar">
+    <button data-view="dashboard" class="tab-btn active">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+      Inicio
+    </button>
+    <button data-view="equipos" class="tab-btn">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Equipos
+    </button>
+    <button data-view="guias" class="tab-btn">
+      <svg viewBox="0 0 24 24"><path d="M7 7h13M7 7l4-4M7 7l4 4M17 17H4M17 17l-4-4M17 17l-4 4"/></svg>
+      Guías
+    </button>
+    <button data-view="facturas" class="tab-btn">
+      <svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      Facturas
+    </button>
+    <button data-view="reportes" class="tab-btn">
+      <svg viewBox="0 0 24 24"><path d="M4 19V9M12 19V5M20 19v-7"/></svg>
+      Reportes
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase (compat, sin build tools) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CONFIGURACIÓN — reemplazar con el proyecto Firebase NUEVO de EDA
+   (Firebase console → Configuración del proyecto → tus apps → SDK)
+   ═══════════════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBzaciARRzckKMlmXLX7euYnW-Zrs3UnN4",
+  authDomain: "eda-prueba-e3498.firebaseapp.com",
+  projectId: "eda-prueba-e3498",
+  storageBucket: "eda-prueba-e3498.firebasestorage.app",
+  messagingSenderId: "829078065575",
+  appId: "1:829078065575:web:ed3ad0bb311d94e5d0e682"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* Perfiles fijos — 3 usuarios, PIN de 4 dígitos.
+   El PIN real se valida contra el documento en /usuarios/{id} en Firestore,
+   esto solo define quién aparece en la pantalla de login. */
+const PERFILES = [
+  { id: 'cristobal', nombre: 'Cristóbal' },
+  { id: 'genesis',   nombre: 'Genésis'   },
+  { id: 'alexandra', nombre: 'Alexandra' },
+];
+
+let currentUser = null;   // { id, nombre }
+let pinBuffer = '';
+let selectedProfile = null;
+let currentView = 'dashboard';
+let equiposCache = [];
+let guiasCache = [];          // colección "guias" — flujo nuevo, en marcha
+let facturasCache = [];       // colección "facturas" — recepción de compras
+let historialLegado = [];     // colección "movimientos" — historial importado del Excel, solo lectura
+let familiaActiva = 'todas';
+let dispoActiva = 'todas';
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ── LOGIN: selección de perfil + teclado PIN ─────────────────────── */
+function renderProfilePick(){
+  const el = document.getElementById('profilePick');
+  el.innerHTML = PERFILES.map(p =>
+    `<button class="profile-chip" data-id="${p.id}">${p.nombre}</button>`
+  ).join('');
+  el.querySelectorAll('.profile-chip').forEach(btn=>{
+    btn.onclick = () => {
+      el.querySelectorAll('.profile-chip').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedProfile = PERFILES.find(p=>p.id===btn.dataset.id);
+      pinBuffer=''; renderPinDots();
+      document.getElementById('pinArea').classList.remove('hide');
+      document.getElementById('pinError').textContent='';
+    };
+  });
+}
+function renderPinGrid(){
+  const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  const el = document.getElementById('pinGrid');
+  el.innerHTML = keys.map(k => k
+    ? `<button class="pin-key" data-k="${k}">${k}</button>`
+    : `<div></div>`
+  ).join('');
+  el.querySelectorAll('.pin-key').forEach(btn=>{
+    btn.onclick = () => {
+      const k = btn.dataset.k;
+      if (k === '⌫') pinBuffer = pinBuffer.slice(0,-1);
+      else if (pinBuffer.length < 4) pinBuffer += k;
+      renderPinDots();
+      if (pinBuffer.length === 4) tryLogin();
+    };
+  });
+}
+function renderPinDots(){
+  const el = document.getElementById('pinDots');
+  el.innerHTML = [0,1,2,3].map(i =>
+    `<div class="pin-dot ${i < pinBuffer.length ? 'filled':''}"></div>`
+  ).join('');
+}
+async function tryLogin(){
+  if (!selectedProfile) return;
+  try{
+    const snap = await db.collection('usuarios').doc(selectedProfile.id).get();
+    const data = snap.data();
+    if (!snap.exists || data.pin !== pinBuffer){
+      document.getElementById('pinError').textContent = 'PIN incorrecto';
+      pinBuffer=''; renderPinDots();
+      return;
+    }
+    currentUser = { id: selectedProfile.id, nombre: data.nombre || selectedProfile.nombre };
+    localStorage.setItem('eda_uid', currentUser.id); // solo para recordar el perfil, no es token de sesión
+    enterApp();
+  }catch(e){
+    document.getElementById('pinError').textContent = 'Error de conexión — revisa Firebase config';
+    console.error(e);
+  }
+}
+function enterApp(){
+  document.getElementById('loginView').classList.add('hide');
+  document.getElementById('appView').classList.remove('hide');
+  document.getElementById('whoLabel').textContent = currentUser.nombre;
+  loadAll();
+  switchView('dashboard');
+}
+document.getElementById('logoutBtn').onclick = () => {
+  currentUser = null; pinBuffer=''; selectedProfile=null;
+  localStorage.removeItem('eda_uid');
+  document.getElementById('appView').classList.add('hide');
+  document.getElementById('loginView').classList.remove('hide');
+  document.getElementById('pinArea').classList.add('hide');
+  document.querySelectorAll('.profile-chip').forEach(b=>b.classList.remove('active'));
+};
+
+/* ── NAV ──────────────────────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick = () => switchView(btn.dataset.view);
+});
+function switchView(v){
+  currentView = v;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===v));
+  ['dashboard','equipos','guias','facturas','reportes'].forEach(id=>{
+    document.getElementById('view-'+id).classList.toggle('hide', id!==v);
+  });
+  document.getElementById('viewTitle').textContent = {
+    dashboard:'Inicio', equipos:'Equipos', guias:'Guías de Despacho', facturas:'Facturas', reportes:'Reportes'
+  }[v];
+  document.getElementById('fabAdd').classList.toggle('hide', v==='dashboard' || v==='reportes');
+  if (v==='dashboard') renderDashboard();
+  if (v==='equipos') renderEquipos();
+  if (v==='guias') renderGuias();
+  if (v==='facturas') renderFacturas();
+  if (v==='reportes') renderReportes();
+}
+
+/* ── DATA LOAD ────────────────────────────────────────────────────── */
+async function loadAll(){
+  db.collection('equipos').onSnapshot(snap=>{
+    equiposCache = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    if (currentView==='dashboard') renderDashboard();
+    if (currentView==='equipos') renderEquipos();
+    if (currentView==='reportes') renderReportes();
+  });
+  db.collection('guias').orderBy('creadoEn','desc').limit(300).onSnapshot(snap=>{
+    guiasCache = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    if (currentView==='dashboard') renderDashboard();
+    if (currentView==='guias') renderGuias();
+    if (currentView==='reportes') renderReportes();
+  });
+  db.collection('facturas').orderBy('creadoEn','desc').limit(300).onSnapshot(snap=>{
+    facturasCache = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    if (currentView==='dashboard') renderDashboard();
+    if (currentView==='facturas') renderFacturas();
+    if (currentView==='reportes') renderReportes();
+  });
+  // Historial importado del Excel (hoja "Bodega") — solo lectura, se muestra en la ficha del equipo
+  db.collection('movimientos').orderBy('creadoEn','desc').limit(600).onSnapshot(snap=>{
+    historialLegado = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  });
+}
+
+/* ── DASHBOARD ────────────────────────────────────────────────────── */
+function renderDashboard(){
+  const total = equiposCache.length;
+  const disponibles = equiposCache.filter(e=>/^disponible$/i.test((e.disponibilidad||'').trim())).length;
+  const noDisp = equiposCache.filter(e=>/no ?disponible/i.test(e.disponibilidad||'')).length;
+  const malos = equiposCache.filter(e=>/malo|repuesto/i.test(e.estadoFisico||'')).length;
+  const facturasPend = facturasCache.filter(f=>(f.estado||'Pendiente')==='Pendiente').length;
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">Equipos totales</div></div>
+    <div class="stat"><div class="num" style="color:var(--green)">${disponibles}</div><div class="lbl">Disponibles</div></div>
+    <div class="stat"><div class="num" style="color:var(--yellow)">${noDisp}</div><div class="lbl">No disponibles / en terreno</div></div>
+    <div class="stat"><div class="num" style="color:var(--red)">${malos}</div><div class="lbl">Malo / repuesto</div></div>
+    <div class="stat"><div class="num" style="color:var(--purple)">${facturasPend}</div><div class="lbl">Facturas pendientes conformidad</div></div>
+  `;
+  const recent = guiasCache.slice(0,8);
+  document.getElementById('recentMovs').innerHTML = recent.length ? recent.map(g=>`
+    <div class="hist-item">
+      <div>
+        <div style="font-weight:600">${escapeHtml(g.numeroGuia||'S/N')} · ${escapeHtml(g.tipo||'')}</div>
+        <div style="color:var(--txm);font-size:11.5px">${escapeHtml(g.destino||'—')} · ${(g.lineas||[]).length} ítem(s)</div>
+      </div>
+      ${guiaEstadoBadge(g.estado)}
+    </div>
+  `).join('') : `<div class="empty">Sin guías de despacho registradas aún</div>`;
+}
+
+/* ── EQUIPOS ──────────────────────────────────────────────────────── */
+function renderEquipos(){
+  const familias = ['todas', ...new Set(equiposCache.map(e=>e.familia).filter(Boolean))];
+  document.getElementById('familiaFilters').innerHTML = familias.map(f=>
+    `<button class="filter-chip ${familiaActiva===f?'active':''}" data-f="${escapeHtml(f)}">${f==='todas'?'Todas las familias':escapeHtml(f)}</button>`
+  ).join('');
+  document.querySelectorAll('#familiaFilters .filter-chip').forEach(b=>{
+    b.onclick=()=>{ familiaActiva=b.dataset.f; renderEquipos(); };
+  });
+
+  const dispos = ['todas','Disponible','No disponible','Servicio técnico'];
+  document.getElementById('dispoFilters').innerHTML = dispos.map(d=>
+    `<button class="filter-chip ${dispoActiva===d?'active':''}" data-d="${escapeHtml(d)}">${d==='todas'?'Cualquier estado':escapeHtml(d)}</button>`
+  ).join('');
+  document.querySelectorAll('#dispoFilters .filter-chip').forEach(b=>{
+    b.onclick=()=>{ dispoActiva=b.dataset.d; renderEquipos(); };
+  });
+
+  const q = (document.getElementById('eqSearch').value||'').toLowerCase();
+  let list = equiposCache.filter(e=>{
+    if (familiaActiva!=='todas' && e.familia!==familiaActiva) return false;
+    if (dispoActiva!=='todas'){
+      const d = (e.disponibilidad||'').toLowerCase();
+      if (dispoActiva==='Disponible' && !/^disponible$/.test(d)) return false;
+      if (dispoActiva==='No disponible' && !/no ?disponible/.test(d)) return false;
+      if (dispoActiva==='Servicio técnico' && !/servicio/.test(d)) return false;
+    }
+    if (q && !(`${e.codigo} ${e.nombre} ${e.numeroSerie} ${e.marca}`.toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''));
+
+  document.getElementById('equiposList').innerHTML = list.length ? list.map(e=>`
+    <div class="eq-row" data-id="${e.id}">
+      <div class="eq-main">
+        <div class="cod">${escapeHtml(e.codigo||'')}</div>
+        <div class="nom">${escapeHtml(e.nombre||'Sin nombre')}</div>
+        <div class="sub">${escapeHtml(e.marca||'')} ${escapeHtml(e.modelo||'')} ${e.numeroSerie?'· '+escapeHtml(e.numeroSerie):''}</div>
+      </div>
+      <div class="eq-right">
+        ${dispoBadge(e.disponibilidad)}
+        ${estadoBadge(e.estadoFisico)}
+      </div>
+    </div>
+  `).join('') : `<div class="empty">No hay equipos que coincidan</div>`;
+
+  document.querySelectorAll('.eq-row').forEach(row=>{
+    row.onclick = () => openEquipoDetail(row.dataset.id);
+  });
+  document.getElementById('eqSearch').oninput = renderEquipos;
+}
+function dispoBadge(v){
+  v = (v||'').toLowerCase();
+  if (/^disponible$/.test(v)) return `<span class="badge green">Disponible</span>`;
+  if (/no ?disponible/.test(v)) return `<span class="badge yellow">No disponible</span>`;
+  if (/servicio/.test(v)) return `<span class="badge red">Serv. técnico</span>`;
+  return `<span class="badge blue">${escapeHtml(v||'—')}</span>`;
+}
+function estadoBadge(v){
+  v = (v||'').toLowerCase();
+  if (/bueno/.test(v)) return '';
+  if (/malo/.test(v)) return `<span class="badge red">Malo</span>`;
+  if (/repuesto/.test(v)) return `<span class="badge purple">Repuesto</span>`;
+  return '';
+}
+
+function openEquipoDetail(id){
+  const e = equiposCache.find(x=>x.id===id);
+  if (!e) return;
+  const guiasEquipo = guiasCache.filter(g => (g.lineas||[]).some(l=>l.codigo===e.codigo))
+    .map(g => ({ fuente:'guia', fecha: g.fechaEnvio, tipo: g.tipo, ref: g.numeroGuia, g }));
+  const legadoEquipo = historialLegado.filter(m=>m.equipoCodigo===e.codigo)
+    .map(m => ({ fuente:'legado', fecha: m.fecha, tipo: m.tipo, ref: m.proyecto }));
+  const historial = [...guiasEquipo, ...legadoEquipo]
+    .sort((a,b)=> toMillis(b.fecha)-toMillis(a.fecha)).slice(0,10);
+  showSheet(`
+    <h3>${escapeHtml(e.codigo)} — ${escapeHtml(e.nombre||'')}</h3>
+    <div class="field"><label>Familia</label><input value="${escapeHtml(e.familia||'')}" id="f_familia"></div>
+    <div class="field"><label>Marca / Modelo</label><input value="${escapeHtml((e.marca||'')+' '+(e.modelo||''))}" id="f_marcamodelo" disabled></div>
+    <div class="field"><label>N° de serie</label><input value="${escapeHtml(e.numeroSerie||'')}" id="f_serie"></div>
+    <div class="field"><label>Estado físico</label>
+      <select id="f_estado">
+        ${['Bueno','Malo','Repuesto'].map(o=>`<option ${e.estadoFisico===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Disponibilidad / ubicación</label><input value="${escapeHtml(e.disponibilidad||'')}" id="f_dispo"></div>
+    <div class="field"><label>Notas</label><textarea id="f_notas" rows="2">${escapeHtml(e.notaEstado||'')}</textarea></div>
+    <div class="btn-row">
+      <button class="btn primary" id="saveEqBtn">Guardar</button>
+      <button class="btn ghost" id="movEqBtn">Nueva guía con este equipo</button>
+    </div>
+    <h3 style="margin-top:18px;font-size:14px">Historial reciente</h3>
+    <div id="eqHist">${historial.length ? historial.map(h=>`
+      <div class="hist-item">
+        <div>${escapeHtml(h.tipo||'')} · ${escapeHtml(h.ref||'—')} ${h.fuente==='legado'?'<span style=\"color:var(--txm)\">(histórico Excel)</span>':''}</div>
+        <div style="color:var(--txm)">${formatDate(h.fecha)}</div>
+      </div>`).join('') : '<div class="empty">Sin movimientos para este equipo</div>'}
+    </div>
+  `);
+  document.getElementById('saveEqBtn').onclick = async ()=>{
+    await db.collection('equipos').doc(id).update({
+      familia: document.getElementById('f_familia').value.trim(),
+      numeroSerie: document.getElementById('f_serie').value.trim(),
+      estadoFisico: document.getElementById('f_estado').value,
+      disponibilidad: document.getElementById('f_dispo').value.trim(),
+      notaEstado: document.getElementById('f_notas').value.trim(),
+      actualizadoPor: currentUser.nombre,
+      actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    toast('Equipo actualizado');
+    closeSheet();
+  };
+  document.getElementById('movEqBtn').onclick = ()=>{ closeSheet(); openGuiaForm(e); };
+}
+
+/* ── FORM: nuevo equipo ──────────────────────────────────────────── */
+document.getElementById('fabAdd').onclick = () => {
+  if (currentView==='guias') return openGuiaForm();
+  if (currentView==='facturas') return openFacturaForm();
+  openEquipoForm();
+};
+function openEquipoForm(){
+  showSheet(`
+    <h3>Nuevo equipo</h3>
+    <div class="field"><label>Código de activo *</label><input id="n_codigo" placeholder="EQ-230"></div>
+    <div class="field"><label>Nombre *</label><input id="n_nombre" placeholder="Multímetro digital"></div>
+    <div class="field"><label>Familia</label><input id="n_familia" placeholder="Multímetros FLUKE"></div>
+    <div class="field"><label>Marca</label><input id="n_marca"></div>
+    <div class="field"><label>Modelo</label><input id="n_modelo"></div>
+    <div class="field"><label>N° de serie</label><input id="n_serie"></div>
+    <div class="field"><label>Disponibilidad</label><input id="n_dispo" value="Disponible"></div>
+    <div class="btn-row"><button class="btn primary" id="createEqBtn">Crear equipo</button></div>
+  `);
+  document.getElementById('createEqBtn').onclick = async ()=>{
+    const codigo = document.getElementById('n_codigo').value.trim();
+    const nombre = document.getElementById('n_nombre').value.trim();
+    if (!codigo || !nombre){ toast('Código y nombre son obligatorios'); return; }
+    await db.collection('equipos').add({
+      codigo, nombre,
+      familia: document.getElementById('n_familia').value.trim(),
+      marca: document.getElementById('n_marca').value.trim(),
+      modelo: document.getElementById('n_modelo').value.trim(),
+      numeroSerie: document.getElementById('n_serie').value.trim(),
+      disponibilidad: document.getElementById('n_dispo').value.trim() || 'Disponible',
+      estadoFisico: 'Bueno',
+      creadoPor: currentUser.nombre,
+      creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    toast('Equipo creado');
+    closeSheet();
+  };
+}
+
+/* ── GUÍAS DE DESPACHO ────────────────────────────────────────────────
+   Una guía es un documento (interno o externo) que ampara una o varias
+   líneas — equipos individuales y/o ítems de EPP/herramientas — enviados
+   juntos. Cada línea se recepciona por separado con su propia fecha y
+   estado de llegada; la guía queda "Recepcionada" cuando todas sus
+   líneas lo están.                                                    */
+let guiaFiltroTipo = 'todas';
+let guiaFiltroEstado = 'todas';
+
+function guiaEstadoBadge(estado){
+  if (estado === 'Recepcionada') return '<span class="badge green">Recepcionada</span>';
+  if (estado === 'Parcial') return '<span class="badge yellow">Recepción parcial</span>';
+  return '<span class="badge blue">En tránsito</span>';
+}
+function toMillis(v){
+  if (!v) return 0;
+  if (v.toDate) return v.toDate().getTime();
+  if (typeof v === 'string') return new Date(v).getTime() || 0;
+  if (v instanceof Date) return v.getTime();
+  return 0;
+}
+
+function renderGuias(){
+  const tipos = ['todas','Interna','Externa'];
+  document.getElementById('guiaTipoFilters').innerHTML = tipos.map(t=>
+    `<button class="filter-chip ${guiaFiltroTipo===t?'active':''}" data-t="${t}">${t==='todas'?'Todas':t}</button>`
+  ).join('');
+  document.querySelectorAll('#guiaTipoFilters .filter-chip').forEach(b=>{
+    b.onclick = ()=>{ guiaFiltroTipo=b.dataset.t; renderGuias(); };
+  });
+  const estados = ['todas','En tránsito','Parcial','Recepcionada'];
+  document.getElementById('guiaEstadoFilters').innerHTML = estados.map(s=>
+    `<button class="filter-chip ${guiaFiltroEstado===s?'active':''}" data-s="${s}">${s==='todas'?'Cualquier estado':s}</button>`
+  ).join('');
+  document.querySelectorAll('#guiaEstadoFilters .filter-chip').forEach(b=>{
+    b.onclick = ()=>{ guiaFiltroEstado=b.dataset.s; renderGuias(); };
+  });
+
+  let list = guiasCache.filter(g=>{
+    if (guiaFiltroTipo!=='todas' && g.tipo!==guiaFiltroTipo) return false;
+    if (guiaFiltroEstado!=='todas' && (g.estado||'En tránsito')!==guiaFiltroEstado) return false;
+    return true;
+  });
+  document.getElementById('guiasList').innerHTML = list.length ? list.map(g=>`
+    <div class="eq-row" data-id="${g.id}">
+      <div class="eq-main">
+        <div class="cod">${escapeHtml(g.numeroGuia||'S/N')} · ${escapeHtml(g.tipo||'')}</div>
+        <div class="nom">${escapeHtml(g.origen||'—')} → ${escapeHtml(g.destino||'—')}</div>
+        <div class="sub">${(g.lineas||[]).length} ítem(s) ${g.proyecto ? '· '+escapeHtml(g.proyecto) : ''}</div>
+      </div>
+      <div class="eq-right">
+        ${guiaEstadoBadge(g.estado)}
+        <div style="color:var(--txm);font-size:11px">${formatDate(g.fechaEnvio)}</div>
+      </div>
+    </div>
+  `).join('') : `<div class="empty">Sin guías de despacho registradas</div>`;
+
+  document.querySelectorAll('#guiasList .eq-row').forEach(row=>{
+    row.onclick = () => openGuiaDetail(row.dataset.id);
+  });
+}
+
+/* Formulario de nueva guía — encabezado + líneas (equipo o EPP) agregadas en memoria
+   antes de guardar todo junto como un solo documento.                                */
+let lineasBorrador = [];
+function openGuiaForm(equipoPrefill){
+  lineasBorrador = [];
+  if (equipoPrefill) lineasBorrador.push({ tipoLinea:'equipo', codigo: equipoPrefill.codigo, nombre: equipoPrefill.nombre, numeroSerie: equipoPrefill.numeroSerie||'' });
+  showSheet(`
+    <h3>Nueva guía de despacho</h3>
+    <div class="seg" id="tipoGuiaSeg">
+      <button class="active" data-t="Interna">Interna</button>
+      <button data-t="Externa">Externa</button>
+    </div>
+    <div class="field"><label>N° de guía</label><input id="g_numero" placeholder="Correlativo interno o folio del proveedor"></div>
+    <div class="field"><label>Proyecto</label><input id="g_proyecto" placeholder="PRCL2699"></div>
+    <div class="field"><label>Origen</label><input id="g_origen" placeholder="Bodega Kennedy"></div>
+    <div class="field"><label>Destino</label><input id="g_destino" placeholder="Nombre del proyecto / cliente / persona"></div>
+    <div class="field"><label>Responsable que despacha</label><input id="g_despacha" value="${escapeHtml(currentUser.nombre)}"></div>
+    <div class="field"><label>Responsable que recibe</label><input id="g_recibe" placeholder="Nombre completo"></div>
+
+    <h3 style="font-size:14px;margin-top:16px">Ítems de la guía</h3>
+    <div id="lineasList"></div>
+    <div class="seg" id="tipoLineaSeg">
+      <button class="active" data-t="equipo">+ Equipo</button>
+      <button data-t="epp">+ EPP / Herramienta</button>
+    </div>
+    <div id="lineaFormArea"></div>
+
+    <div class="btn-row"><button class="btn primary" id="saveGuiaBtn">Guardar guía</button></div>
+  `);
+  document.querySelectorAll('#tipoGuiaSeg button').forEach(b=>{
+    b.onclick = ()=>{ document.querySelectorAll('#tipoGuiaSeg button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); };
+  });
+  let tipoLineaSel = 'equipo';
+  function renderLineaForm(){
+    const area = document.getElementById('lineaFormArea');
+    if (tipoLineaSel === 'equipo'){
+      const opciones = equiposCache.map(e=>`<option value="${escapeHtml(e.codigo)}">${escapeHtml(e.codigo)} — ${escapeHtml(e.nombre||'')}</option>`).join('');
+      area.innerHTML = `
+        <div class="field"><select id="ln_equipo"><option value="">Selecciona un equipo…</option>${opciones}</select></div>
+        <button class="btn ghost" id="addLineaEqBtn" style="width:100%">Agregar a la guía</button>`;
+      document.getElementById('addLineaEqBtn').onclick = ()=>{
+        const codigo = document.getElementById('ln_equipo').value;
+        const eq = equiposCache.find(e=>e.codigo===codigo);
+        if (!eq){ toast('Selecciona un equipo'); return; }
+        lineasBorrador.push({ tipoLinea:'equipo', codigo: eq.codigo, nombre: eq.nombre, numeroSerie: eq.numeroSerie||'' });
+        renderLineas();
+      };
+    } else {
+      area.innerHTML = `
+        <div class="field"><input id="ln_nombre" placeholder="Nombre del ítem (ej. Casco, Guantes)"></div>
+        <div class="field" style="display:flex;gap:8px">
+          <input id="ln_talla" placeholder="Talla (opcional)" style="flex:1">
+          <input id="ln_cantidad" type="number" placeholder="Cantidad" value="1" style="flex:1">
+        </div>
+        <button class="btn ghost" id="addLineaEppBtn" style="width:100%">Agregar a la guía</button>`;
+      document.getElementById('addLineaEppBtn').onclick = ()=>{
+        const nombre = document.getElementById('ln_nombre').value.trim();
+        if (!nombre){ toast('Escribe el nombre del ítem'); return; }
+        lineasBorrador.push({
+          tipoLinea:'epp', nombre,
+          talla: document.getElementById('ln_talla').value.trim(),
+          cantidad: Number(document.getElementById('ln_cantidad').value) || 1,
+        });
+        renderLineas();
+      };
+    }
+  }
+  function renderLineas(){
+    const el = document.getElementById('lineasList');
+    el.innerHTML = lineasBorrador.length ? lineasBorrador.map((l,i)=>`
+      <div class="hist-item">
+        <div>${l.tipoLinea==='equipo' ? escapeHtml(l.codigo)+' — '+escapeHtml(l.nombre||'') : escapeHtml(l.nombre)+' '+(l.talla?'('+escapeHtml(l.talla)+') ':'')+'x'+l.cantidad}</div>
+        <button data-i="${i}" class="rmLineaBtn" style="color:var(--red);font-size:12px">Quitar</button>
+      </div>
+    `).join('') : '<div class="empty">Aún no agregas ítems</div>';
+    el.querySelectorAll('.rmLineaBtn').forEach(b=>{
+      b.onclick = ()=>{ lineasBorrador.splice(Number(b.dataset.i),1); renderLineas(); };
+    });
+  }
+  document.querySelectorAll('#tipoLineaSeg button').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#tipoLineaSeg button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); tipoLineaSel = b.dataset.t; renderLineaForm();
+    };
+  });
+  renderLineaForm();
+  renderLineas();
+
+  document.getElementById('saveGuiaBtn').onclick = async ()=>{
+    if (!lineasBorrador.length){ toast('Agrega al menos un ítem a la guía'); return; }
+    const tipo = document.querySelector('#tipoGuiaSeg button.active').dataset.t;
+    const lineas = lineasBorrador.map(l => ({ ...l, estadoRecepcion: null, fechaRecepcion: null, observacionRecepcion: '' }));
+    await db.collection('guias').add({
+      numeroGuia: document.getElementById('g_numero').value.trim(),
+      tipo,
+      proyecto: document.getElementById('g_proyecto').value.trim(),
+      origen: document.getElementById('g_origen').value.trim(),
+      destino: document.getElementById('g_destino').value.trim(),
+      responsableDespacha: document.getElementById('g_despacha').value.trim(),
+      responsableRecibe: document.getElementById('g_recibe').value.trim(),
+      estado: 'En tránsito',
+      lineas,
+      fechaEnvio: firebase.firestore.FieldValue.serverTimestamp(),
+      registradoPor: currentUser.nombre,
+      creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    // Los equipos despachados quedan "No disponible" hasta que se recepcionen
+    for (const l of lineasBorrador){
+      if (l.tipoLinea!=='equipo') continue;
+      const eq = equiposCache.find(e=>e.codigo===l.codigo);
+      if (eq) await db.collection('equipos').doc(eq.id).update({
+        disponibilidad: 'No disponible',
+        proyectoActual: document.getElementById('g_proyecto').value.trim(),
+        responsableActual: document.getElementById('g_recibe').value.trim(),
+      });
+    }
+    toast('Guía registrada');
+    closeSheet();
+  };
+}
+
+/* Detalle de guía: recepcionar cada línea con fecha real y estado de llegada */
+function openGuiaDetail(id){
+  const g = guiasCache.find(x=>x.id===id);
+  if (!g) return;
+  const lineasHtml = (g.lineas||[]).map((l,i)=>`
+    <div class="card" style="margin-bottom:8px">
+      <div style="font-weight:600;margin-bottom:4px">
+        ${l.tipoLinea==='equipo' ? escapeHtml(l.codigo)+' — '+escapeHtml(l.nombre||'') : escapeHtml(l.nombre)+' '+(l.talla?'('+escapeHtml(l.talla)+') ':'')+'x'+l.cantidad}
+      </div>
+      ${l.estadoRecepcion ? `
+        <div style="font-size:12.5px;color:var(--txm)">Recepcionado ${formatDate(l.fechaRecepcion)} — estado: ${escapeHtml(l.estadoRecepcion)}${l.observacionRecepcion ? ' · '+escapeHtml(l.observacionRecepcion) : ''}</div>
+      ` : `
+        <div class="field" style="margin-top:8px;margin-bottom:6px">
+          <select id="rec_estado_${i}">
+            <option value="">Estado de llegada…</option>
+            <option value="Bueno">Bueno</option>
+            <option value="Malo">Malo</option>
+            <option value="Incompleto">Incompleto</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:6px"><input id="rec_obs_${i}" placeholder="Observaciones (opcional)"></div>
+        <button class="btn ghost recBtn" data-i="${i}" style="width:100%">Recepcionar este ítem</button>
+      `}
+    </div>
+  `).join('');
+  showSheet(`
+    <h3>${escapeHtml(g.numeroGuia||'S/N')} — ${escapeHtml(g.tipo||'')}</h3>
+    <div style="font-size:13px;color:var(--txm);margin-bottom:14px">
+      ${escapeHtml(g.origen||'—')} → ${escapeHtml(g.destino||'—')} · Despacha: ${escapeHtml(g.responsableDespacha||'—')} · Recibe: ${escapeHtml(g.responsableRecibe||'—')}
+    </div>
+    ${lineasHtml}
+  `);
+  document.querySelectorAll('.recBtn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const i = Number(btn.dataset.i);
+      const estado = document.getElementById('rec_estado_'+i).value;
+      if (!estado){ toast('Selecciona el estado de llegada'); return; }
+      const obs = document.getElementById('rec_obs_'+i).value.trim();
+      const lineas = [...g.lineas];
+      lineas[i] = { ...lineas[i], estadoRecepcion: estado, fechaRecepcion: new Date().toISOString(), observacionRecepcion: obs };
+      const todasRecepcionadas = lineas.every(l=>l.estadoRecepcion);
+      const algunaRecepcionada = lineas.some(l=>l.estadoRecepcion);
+      await db.collection('guias').doc(g.id).update({
+        lineas,
+        estado: todasRecepcionadas ? 'Recepcionada' : (algunaRecepcionada ? 'Parcial' : 'En tránsito'),
+      });
+      const l = lineas[i];
+      if (l.tipoLinea === 'equipo'){
+        const eq = equiposCache.find(e=>e.codigo===l.codigo);
+        if (eq) await db.collection('equipos').doc(eq.id).update({
+          disponibilidad: estado==='Bueno' ? 'Disponible' : eq.disponibilidad,
+          estadoFisico: estado==='Malo' ? 'Malo' : eq.estadoFisico,
+          proyectoActual: firebase.firestore.FieldValue.delete(),
+          responsableActual: firebase.firestore.FieldValue.delete(),
+        });
+      }
+      toast('Ítem recepcionado');
+      closeSheet();
+      openGuiaDetail(id);
+    };
+  });
+}
+
+/* ── FACTURAS (recepción de compras) ─────────────────────────────────
+   Registro de facturas de proveedores: qué llegó, contra qué OC, y si
+   está conforme. Los ítems que son equipos nuevos se pueden ingresar
+   directo al inventario desde la ficha de la factura.                */
+let facturaFiltroEstado = 'todas';
+let lineasFacturaBorrador = [];
+
+function facturaEstadoBadge(estado){
+  if (estado === 'Conforme') return '<span class="badge green">Conforme</span>';
+  if (estado === 'Con observaciones') return '<span class="badge yellow">Con observaciones</span>';
+  return '<span class="badge blue">Pendiente</span>';
+}
+
+function renderFacturas(){
+  const estados = ['todas','Pendiente','Conforme','Con observaciones'];
+  document.getElementById('facturaEstadoFilters').innerHTML = estados.map(s=>
+    `<button class="filter-chip ${facturaFiltroEstado===s?'active':''}" data-s="${s}">${s==='todas'?'Todas':s}</button>`
+  ).join('');
+  document.querySelectorAll('#facturaEstadoFilters .filter-chip').forEach(b=>{
+    b.onclick = ()=>{ facturaFiltroEstado=b.dataset.s; renderFacturas(); };
+  });
+
+  let list = facturasCache.filter(f => facturaFiltroEstado==='todas' || (f.estado||'Pendiente')===facturaFiltroEstado);
+  document.getElementById('facturasList').innerHTML = list.length ? list.map(f=>`
+    <div class="eq-row" data-id="${f.id}">
+      <div class="eq-main">
+        <div class="cod">${escapeHtml(f.numeroFactura||'S/N')} · OC ${escapeHtml(f.numeroOC||'—')}</div>
+        <div class="nom">${escapeHtml(f.proveedor||'Proveedor sin nombre')}</div>
+        <div class="sub">${(f.lineas||[]).length} ítem(s) ${f.montoTotal ? '· $'+Number(f.montoTotal).toLocaleString('es-CL') : ''}</div>
+      </div>
+      <div class="eq-right">
+        ${facturaEstadoBadge(f.estado)}
+        <div style="color:var(--txm);font-size:11px">${formatDate(f.fecha)}</div>
+      </div>
+    </div>
+  `).join('') : `<div class="empty">Sin facturas registradas</div>`;
+
+  document.querySelectorAll('#facturasList .eq-row').forEach(row=>{
+    row.onclick = () => openFacturaDetail(row.dataset.id);
+  });
+}
+
+function openFacturaForm(){
+  lineasFacturaBorrador = [];
+  showSheet(`
+    <h3>Nueva factura</h3>
+    <div class="field"><label>N° de factura</label><input id="fa_numero" placeholder="Folio del proveedor"></div>
+    <div class="field"><label>Proveedor</label><input id="fa_proveedor"></div>
+    <div class="field"><label>N° de Orden de Compra</label><input id="fa_oc" placeholder="OC-2026-XXX"></div>
+    <div class="field"><label>Monto total</label><input id="fa_monto" type="number" placeholder="0"></div>
+    <div class="field"><label>Responsable que recibe</label><input id="fa_recibe" value="${escapeHtml(currentUser.nombre)}"></div>
+
+    <h3 style="font-size:14px;margin-top:16px">Ítems recibidos</h3>
+    <div id="lineasFacturaList"></div>
+    <div class="field"><input id="lf_desc" placeholder="Descripción del ítem"></div>
+    <div class="field" style="display:flex;gap:8px">
+      <select id="lf_tipo" style="flex:1">
+        <option value="Equipo">Equipo</option>
+        <option value="Insumo">Insumo</option>
+        <option value="EPP">EPP</option>
+      </select>
+      <input id="lf_cantidad" type="number" placeholder="Cantidad" value="1" style="flex:1">
+    </div>
+    <button class="btn ghost" id="addLineaFacturaBtn" style="width:100%">Agregar ítem</button>
+
+    <div class="btn-row"><button class="btn primary" id="saveFacturaBtn">Guardar factura</button></div>
+  `);
+  function renderLineasFactura(){
+    const el = document.getElementById('lineasFacturaList');
+    el.innerHTML = lineasFacturaBorrador.length ? lineasFacturaBorrador.map((l,i)=>`
+      <div class="hist-item">
+        <div>${escapeHtml(l.descripcion)} · ${escapeHtml(l.tipo)} x${l.cantidad}</div>
+        <button data-i="${i}" class="rmLfBtn" style="color:var(--red);font-size:12px">Quitar</button>
+      </div>
+    `).join('') : '<div class="empty">Aún no agregas ítems</div>';
+    el.querySelectorAll('.rmLfBtn').forEach(b=>{
+      b.onclick = ()=>{ lineasFacturaBorrador.splice(Number(b.dataset.i),1); renderLineasFactura(); };
+    });
+  }
+  document.getElementById('addLineaFacturaBtn').onclick = ()=>{
+    const desc = document.getElementById('lf_desc').value.trim();
+    if (!desc){ toast('Escribe la descripción del ítem'); return; }
+    lineasFacturaBorrador.push({
+      descripcion: desc,
+      tipo: document.getElementById('lf_tipo').value,
+      cantidad: Number(document.getElementById('lf_cantidad').value) || 1,
+      ingresadoInventario: false,
+    });
+    document.getElementById('lf_desc').value = '';
+    renderLineasFactura();
+  };
+  renderLineasFactura();
+
+  document.getElementById('saveFacturaBtn').onclick = async ()=>{
+    if (!lineasFacturaBorrador.length){ toast('Agrega al menos un ítem'); return; }
+    await db.collection('facturas').add({
+      numeroFactura: document.getElementById('fa_numero').value.trim(),
+      proveedor: document.getElementById('fa_proveedor').value.trim(),
+      numeroOC: document.getElementById('fa_oc').value.trim(),
+      montoTotal: Number(document.getElementById('fa_monto').value) || 0,
+      responsableRecibe: document.getElementById('fa_recibe').value.trim(),
+      estado: 'Pendiente',
+      observacionConformidad: '',
+      lineas: lineasFacturaBorrador,
+      fecha: firebase.firestore.FieldValue.serverTimestamp(),
+      registradoPor: currentUser.nombre,
+      creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    toast('Factura registrada');
+    closeSheet();
+  };
+}
+
+function openFacturaDetail(id){
+  const f = facturasCache.find(x=>x.id===id);
+  if (!f) return;
+  const lineasHtml = (f.lineas||[]).map((l,i)=>`
+    <div class="hist-item">
+      <div>${escapeHtml(l.descripcion)} · ${escapeHtml(l.tipo)} x${l.cantidad}</div>
+      ${l.tipo==='Equipo'
+        ? (l.ingresadoInventario
+            ? '<span class="badge green">En inventario</span>'
+            : `<button class="btn ghost ingresarBtn" data-i="${i}" style="font-size:12px;padding:6px 10px">Ingresar a inventario</button>`)
+        : ''}
+    </div>
+  `).join('');
+  showSheet(`
+    <h3>${escapeHtml(f.numeroFactura||'S/N')} — ${escapeHtml(f.proveedor||'')}</h3>
+    <div style="font-size:13px;color:var(--txm);margin-bottom:14px">
+      OC ${escapeHtml(f.numeroOC||'—')} · Recibe: ${escapeHtml(f.responsableRecibe||'—')} ${f.montoTotal ? '· $'+Number(f.montoTotal).toLocaleString('es-CL') : ''}
+    </div>
+    ${lineasHtml}
+    <h3 style="font-size:14px;margin-top:16px">Conformidad con la OC</h3>
+    <div class="seg" id="confSeg">
+      <button data-c="Conforme" class="${f.estado==='Conforme'?'active':''}">Conforme</button>
+      <button data-c="Con observaciones" class="${f.estado==='Con observaciones'?'active':''}">Con observaciones</button>
+    </div>
+    <div class="field"><textarea id="fa_obs" rows="2" placeholder="Observaciones (opcional)">${escapeHtml(f.observacionConformidad||'')}</textarea></div>
+    <div class="btn-row"><button class="btn primary" id="saveConfBtn">Guardar conformidad</button></div>
+  `);
+  let confSel = f.estado === 'Con observaciones' ? 'Con observaciones' : 'Conforme';
+  document.querySelectorAll('#confSeg button').forEach(b=>{
+    b.onclick = ()=>{ document.querySelectorAll('#confSeg button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); confSel=b.dataset.c; };
+  });
+  document.getElementById('saveConfBtn').onclick = async ()=>{
+    await db.collection('facturas').doc(f.id).update({
+      estado: confSel,
+      observacionConformidad: document.getElementById('fa_obs').value.trim(),
+    });
+    toast('Conformidad guardada');
+    closeSheet();
+  };
+  document.querySelectorAll('.ingresarBtn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const i = Number(btn.dataset.i);
+      const linea = f.lineas[i];
+      showSheet(`
+        <h3>Ingresar equipo al inventario</h3>
+        <div class="field"><label>Código de activo *</label><input id="ie_codigo" placeholder="EQ-231"></div>
+        <div class="field"><label>Nombre</label><input id="ie_nombre" value="${escapeHtml(linea.descripcion)}"></div>
+        <div class="field"><label>N° de serie</label><input id="ie_serie"></div>
+        <div class="btn-row"><button class="btn primary" id="confirmIngresoBtn">Crear equipo</button></div>
+      `);
+      document.getElementById('confirmIngresoBtn').onclick = async ()=>{
+        const codigo = document.getElementById('ie_codigo').value.trim();
+        if (!codigo){ toast('El código de activo es obligatorio'); return; }
+        await db.collection('equipos').add({
+          codigo,
+          nombre: document.getElementById('ie_nombre').value.trim(),
+          numeroSerie: document.getElementById('ie_serie').value.trim(),
+          disponibilidad: 'Disponible',
+          estadoFisico: 'Bueno',
+          origenFactura: f.numeroFactura || '',
+          creadoPor: currentUser.nombre,
+          creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        const lineas = [...f.lineas];
+        lineas[i] = { ...lineas[i], ingresadoInventario: true };
+        await db.collection('facturas').doc(f.id).update({ lineas });
+        toast('Equipo ingresado al inventario');
+        closeSheet();
+        openFacturaDetail(id);
+      };
+    };
+  });
+}
+
+/* ── REPORTES ─────────────────────────────────────────────────────── */
+function renderReportes(){
+  const sinCert = equiposCache.filter(e => e.certificado && /no/i.test(String(e.certificado)));
+  document.getElementById('certList').innerHTML = sinCert.length ? sinCert.map(e=>`
+    <div class="hist-item"><div>${escapeHtml(e.codigo)} — ${escapeHtml(e.nombre||'')}</div><span class="badge red">Sin certificado</span></div>
+  `).join('') : `<div class="empty">Todo el equipo con certificación registrada está al día</div>`;
+}
+function toCsv(rows, headers){
+  const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  return [headers.join(','), ...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');
+}
+function downloadCsv(filename, csv){
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+}
+document.getElementById('exportEquiposBtn').onclick = ()=>{
+  const headers = ['codigo','nombre','familia','marca','modelo','numeroSerie','estadoFisico','disponibilidad'];
+  downloadCsv('equipos_eda.csv', toCsv(equiposCache, headers));
+};
+document.getElementById('exportGuiasBtn').onclick = ()=>{
+  const headers = ['numeroGuia','tipo','proyecto','origen','destino','responsableDespacha','responsableRecibe','estado','item','cantidad','estadoRecepcion'];
+  const filas = [];
+  guiasCache.forEach(g=>{
+    (g.lineas||[]).forEach(l=>{
+      filas.push({
+        numeroGuia:g.numeroGuia, tipo:g.tipo, proyecto:g.proyecto, origen:g.origen, destino:g.destino,
+        responsableDespacha:g.responsableDespacha, responsableRecibe:g.responsableRecibe, estado:g.estado,
+        item: l.tipoLinea==='equipo' ? `${l.codigo} — ${l.nombre||''}` : `${l.nombre}${l.talla?' ('+l.talla+')':''}`,
+        cantidad: l.tipoLinea==='epp' ? l.cantidad : 1,
+        estadoRecepcion: l.estadoRecepcion || 'Pendiente',
+      });
+    });
+  });
+  downloadCsv('guias_despacho_eda.csv', toCsv(filas, headers));
+};
+document.getElementById('exportFacturasBtn').onclick = ()=>{
+  const headers = ['numeroFactura','proveedor','numeroOC','fecha','montoTotal','estado','item','tipo','cantidad'];
+  const filas = [];
+  facturasCache.forEach(f=>{
+    (f.lineas||[]).forEach(l=>{
+      filas.push({
+        numeroFactura:f.numeroFactura, proveedor:f.proveedor, numeroOC:f.numeroOC,
+        fecha: formatDate(f.fecha), montoTotal:f.montoTotal, estado:f.estado,
+        item:l.descripcion, tipo:l.tipo, cantidad:l.cantidad,
+      });
+    });
+  });
+  downloadCsv('facturas_eda.csv', toCsv(filas, headers));
+};
+
+/* ── SHEET/MODAL genérico ────────────────────────────────────────── */
+function showSheet(html){
+  closeSheet();
+  const ov = document.createElement('div');
+  ov.className = 'overlay'; ov.id = 'activeOverlay';
+  ov.innerHTML = `<div class="sheet">${html}</div>`;
+  ov.onclick = (e)=>{ if (e.target===ov) closeSheet(); };
+  document.body.appendChild(ov);
+}
+function closeSheet(){
+  const ov = document.getElementById('activeOverlay');
+  if (ov) ov.remove();
+}
+
+/* ── utils ────────────────────────────────────────────────────────── */
+function escapeHtml(s){
+  return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatDate(v){
+  if (!v) return '';
+  if (v.toDate) v = v.toDate();
+  if (typeof v === 'string') v = new Date(v);
+  if (!(v instanceof Date) || isNaN(v)) return '';
+  return v.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+
+/* ── init ─────────────────────────────────────────────────────────── */
+renderProfilePick();
+renderPinGrid();
+
+/* Service worker */
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body>
+</html>
