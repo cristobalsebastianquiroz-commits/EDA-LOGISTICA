@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EDA Logística">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#eef6fb">
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,18 +19,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <style>
-/* ── TOKENS (mismo lenguaje visual que SANTERRA) ─────────────────── */
+/* ── TOKENS (glassmorphism claro — identidad corporativa EDA) ──────── */
 :root{
-  --bg:#07080d;--sf:rgba(255,255,255,.055);--sf2:rgba(255,255,255,.038);--sf3:rgba(255,255,255,.022);
-  --bd:rgba(255,255,255,.16);--bd2:rgba(255,255,255,.10);--bd3:rgba(255,255,255,.055);
-  --accent:#4f8ef7;--accd:rgba(79,142,247,.14);--accb:rgba(79,142,247,.32);
-  --blue:#4f8ef7;--blued:rgba(79,142,247,.14);--blueb:rgba(79,142,247,.32);
-  --green:#00c98d;--greend:rgba(0,201,141,.14);--greenb:rgba(0,201,141,.32);
-  --yellow:#ffb800;--yellowd:rgba(255,184,0,.14);--yellowb:rgba(255,184,0,.32);
-  --red:#ff4444;--redd:rgba(255,68,68,.14);--redb:rgba(255,68,68,.32);
-  --purple:#a78bfa;--purpled:rgba(167,139,250,.14);--purpleb:rgba(167,139,250,.32);
+  --bg:#eef6fb;--sf:rgba(255,255,255,.62);--sf2:rgba(255,255,255,.46);--sf3:rgba(255,255,255,.30);
+  --bd:rgba(14,60,90,.16);--bd2:rgba(14,60,90,.11);--bd3:rgba(14,60,90,.07);
+  --accent:#4fa8c3;--accd:rgba(79,168,195,.14);--accb:rgba(79,168,195,.38);
+  --blue:#4fa8c3;--blued:rgba(79,168,195,.14);--blueb:rgba(79,168,195,.38);
+  --green:#0e9f6e;--greend:rgba(14,159,110,.14);--greenb:rgba(14,159,110,.32);
+  --yellow:#c97e1b;--yellowd:rgba(255,184,0,.18);--yellowb:rgba(255,184,0,.36);
+  --red:#f70102;--redd:rgba(247,1,2,.12);--redb:rgba(247,1,2,.34);
+  --purple:#8b7bd8;--purpled:rgba(139,123,216,.14);--purpleb:rgba(139,123,216,.32);
   --orange:#ff7849;--oranged:rgba(255,120,73,.14);--orangeb:rgba(255,120,73,.32);
-  --tx:#eef2ff;--txm:#7b8499;--txd:#363c4e;
+  --tx:#12222e;--txm:#5b7690;--txd:#c7d6e0;
   --r:16px;
   --glass-blur:blur(20px) saturate(150%);
   --glass-blur-sm:blur(14px) saturate(140%);
@@ -40,8 +40,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;min-height:100vh;min-height:100dvh}
 body{font-family:'DM Sans',sans-serif;color:var(--tx);background:var(--bg);overflow-x:hidden;
-  background-image:radial-gradient(circle at 20% 0%, rgba(79,142,247,.08), transparent 40%),
-                    radial-gradient(circle at 80% 100%, rgba(0,201,141,.06), transparent 45%);}
+  background-image:radial-gradient(circle at 20% 0%, rgba(79,168,195,.20), transparent 40%),
+                    radial-gradient(circle at 80% 100%, rgba(79,168,195,.14), transparent 45%);}
 h1,h2,h3,.num{font-family:'Inter',sans-serif}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font-family:inherit;color:var(--tx);background:var(--sf2);border:1px solid var(--bd2);
@@ -147,7 +147,7 @@ nav.tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width
 <!-- ═══════════════ LOGIN ═══════════════ -->
 <div id="loginView">
   <div class="brand">
-    <h1>EDA · Logística</h1>
+    <h1><span style="color:var(--accent)">EDA</span><span style="color:var(--red);margin:0 8px;font-weight:200">|</span><span style="font-size:15px;font-weight:600;letter-spacing:.3px;text-transform:uppercase">Logística</span></h1>
     <p>Inventario y control de equipos técnicos</p>
   </div>
   <div id="profilePick" class="profile-pick"></div>
@@ -226,6 +226,15 @@ nav.tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width
         <div id="certList"></div>
       </div>
     </section>
+    <!-- DISPONIBILIDAD (rol comercial: Anderson, Natasha) -->
+    <section id="view-disponibilidad" class="hide">
+      <div class="searchbar">
+        <input id="dispoSearch" placeholder="Buscar por código, nombre o familia…">
+      </div>
+      <div class="card" style="padding:6px 12px">
+        <div id="disponibilidadList"></div>
+      </div>
+    </section>
   </main>
 
   <button class="fab hide" id="fabAdd">+</button>
@@ -251,6 +260,10 @@ nav.tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width
       <svg viewBox="0 0 24 24"><path d="M4 19V9M12 19V5M20 19v-7"/></svg>
       Reportes
     </button>
+    <button data-view="disponibilidad" class="tab-btn">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Disponibilidad
+    </button>
   </nav>
 </div>
 
@@ -275,14 +288,26 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* Perfiles fijos — 3 usuarios, PIN de 4 dígitos.
+/* Perfiles fijos — 5 usuarios, PIN de 4 dígitos.
    El PIN real se valida contra el documento en /usuarios/{id} en Firestore,
-   esto solo define quién aparece en la pantalla de login. */
+   esto solo define quién aparece en la pantalla de login y qué puede ver/editar.
+   rol: 'bodega' (acceso completo), 'supervisor' (solo lectura, con reportes),
+        'comercial' (solo disponibilidad de equipos, sin facturas ni edición) */
 const PERFILES = [
-  { id: 'cristobal', nombre: 'Cristóbal' },
-  { id: 'genesis',   nombre: 'Genésis'   },
-  { id: 'alexandra', nombre: 'Alexandra' },
+  { id: 'cristobal', nombre: 'Cristóbal', rol: 'bodega' },
+  { id: 'genesis',   nombre: 'Genésis',   rol: 'bodega' },
+  { id: 'alexandra', nombre: 'Alexandra', rol: 'supervisor' },
+  { id: 'anderson',  nombre: 'Anderson',  rol: 'comercial' },
+  { id: 'natasha',   nombre: 'Natasha',   rol: 'comercial' },
 ];
+
+/* Qué pestañas y qué acciones de edición tiene cada rol */
+const ROLES = {
+  bodega:     { vistas: ['dashboard','equipos','guias','facturas','reportes'], editar: true  },
+  supervisor: { vistas: ['dashboard','equipos','guias','reportes'],            editar: false },
+  comercial:  { vistas: ['disponibilidad'],                                    editar: false },
+};
+function puedeEditar(){ return !!(ROLES[currentUser?.rol]||{}).editar; }
 
 let currentUser = null;   // { id, nombre }
 let pinBuffer = '';
@@ -295,6 +320,7 @@ let historialLegado = [];     // colección "movimientos" — historial importad
 let familiaActiva = 'todas';
 let dispoActiva = 'todas';
 
+function _norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -352,7 +378,7 @@ async function tryLogin(){
       pinBuffer=''; renderPinDots();
       return;
     }
-    currentUser = { id: selectedProfile.id, nombre: data.nombre || selectedProfile.nombre };
+    currentUser = { id: selectedProfile.id, nombre: data.nombre || selectedProfile.nombre, rol: selectedProfile.rol };
     localStorage.setItem('eda_uid', currentUser.id); // solo para recordar el perfil, no es token de sesión
     enterApp();
   }catch(e){
@@ -364,8 +390,16 @@ function enterApp(){
   document.getElementById('loginView').classList.add('hide');
   document.getElementById('appView').classList.remove('hide');
   document.getElementById('whoLabel').textContent = currentUser.nombre;
+  aplicarPermisosRol();
   loadAll();
-  switchView('dashboard');
+  const permitidas = (ROLES[currentUser.rol]||{}).vistas || ['dashboard'];
+  switchView(permitidas[0]);
+}
+function aplicarPermisosRol(){
+  const permitidas = (ROLES[currentUser.rol]||{}).vistas || [];
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.classList.toggle('hide', !permitidas.includes(btn.dataset.view));
+  });
 }
 document.getElementById('logoutBtn').onclick = () => {
   currentUser = null; pinBuffer=''; selectedProfile=null;
@@ -383,18 +417,19 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 function switchView(v){
   currentView = v;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===v));
-  ['dashboard','equipos','guias','facturas','reportes'].forEach(id=>{
+  ['dashboard','equipos','guias','facturas','reportes','disponibilidad'].forEach(id=>{
     document.getElementById('view-'+id).classList.toggle('hide', id!==v);
   });
   document.getElementById('viewTitle').textContent = {
-    dashboard:'Inicio', equipos:'Equipos', guias:'Guías de Despacho', facturas:'Facturas', reportes:'Reportes'
+    dashboard:'Inicio', equipos:'Equipos', guias:'Guías de Despacho', facturas:'Facturas', reportes:'Reportes', disponibilidad:'Disponibilidad'
   }[v];
-  document.getElementById('fabAdd').classList.toggle('hide', v==='dashboard' || v==='reportes');
+  document.getElementById('fabAdd').classList.toggle('hide', !puedeEditar() || v==='dashboard' || v==='reportes' || v==='disponibilidad');
   if (v==='dashboard') renderDashboard();
   if (v==='equipos') renderEquipos();
   if (v==='guias') renderGuias();
   if (v==='facturas') renderFacturas();
   if (v==='reportes') renderReportes();
+  if (v==='disponibilidad') renderDisponibilidad();
 }
 
 /* ── DATA LOAD ────────────────────────────────────────────────────── */
@@ -404,6 +439,7 @@ async function loadAll(){
     if (currentView==='dashboard') renderDashboard();
     if (currentView==='equipos') renderEquipos();
     if (currentView==='reportes') renderReportes();
+    if (currentView==='disponibilidad') renderDisponibilidad();
   });
   db.collection('guias').orderBy('creadoEn','desc').limit(300).onSnapshot(snap=>{
     guiasCache = snap.docs.map(d=>({ id:d.id, ...d.data() }));
@@ -467,7 +503,7 @@ function renderEquipos(){
     b.onclick=()=>{ dispoActiva=b.dataset.d; renderEquipos(); };
   });
 
-  const q = (document.getElementById('eqSearch').value||'').toLowerCase();
+  const q = _norm(document.getElementById('eqSearch').value);
   let list = equiposCache.filter(e=>{
     if (familiaActiva!=='todas' && e.familia!==familiaActiva) return false;
     if (dispoActiva!=='todas'){
@@ -476,7 +512,7 @@ function renderEquipos(){
       if (dispoActiva==='No disponible' && !/no ?disponible/.test(d)) return false;
       if (dispoActiva==='Servicio técnico' && !/servicio/.test(d)) return false;
     }
-    if (q && !(`${e.codigo} ${e.nombre} ${e.numeroSerie} ${e.marca}`.toLowerCase().includes(q))) return false;
+    if (q && !_norm(`${e.codigo} ${e.nombre} ${e.numeroSerie} ${e.marca} ${e.familia||''}`).includes(q)) return false;
     return true;
   }).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''));
 
@@ -514,6 +550,28 @@ function estadoBadge(v){
   return '';
 }
 
+/* ── DISPONIBILIDAD (vista de solo lectura para el área comercial) ─── */
+function renderDisponibilidad(){
+  const q = _norm(document.getElementById('dispoSearch').value);
+  let list = equiposCache.filter(e=>{
+    if (!q) return true;
+    return _norm(`${e.codigo} ${e.nombre} ${e.familia||''} ${e.marca||''} ${e.modelo||''}`).includes(q);
+  }).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''));
+
+  document.getElementById('disponibilidadList').innerHTML = list.length ? list.map(e=>`
+    <div class="eq-row">
+      <div class="eq-main">
+        <div class="cod">${escapeHtml(e.codigo||'')}</div>
+        <div class="nom">${escapeHtml(e.nombre||'Sin nombre')}</div>
+        <div class="sub">${escapeHtml(e.marca||'')} ${escapeHtml(e.modelo||'')}${e.familia?' · '+escapeHtml(e.familia):''}</div>
+        ${(e.proyectoActual||e.responsableActual) ? `<div class="sub" style="margin-top:2px">${escapeHtml(e.responsableActual||'')} ${e.proyectoActual?'· Proyecto '+escapeHtml(String(e.proyectoActual)):''}</div>` : ''}
+      </div>
+      <div class="eq-right">${dispoBadge(e.disponibilidad)}</div>
+    </div>
+  `).join('') : `<div class="empty">No hay equipos que coincidan</div>`;
+  document.getElementById('dispoSearch').oninput = renderDisponibilidad;
+}
+
 function openEquipoDetail(id){
   const e = equiposCache.find(x=>x.id===id);
   if (!e) return;
@@ -523,22 +581,25 @@ function openEquipoDetail(id){
     .map(m => ({ fuente:'legado', fecha: m.fecha, tipo: m.tipo, ref: m.proyecto }));
   const historial = [...guiasEquipo, ...legadoEquipo]
     .sort((a,b)=> toMillis(b.fecha)-toMillis(a.fecha)).slice(0,10);
+  const soloLectura = !puedeEditar();
+  const dis = soloLectura ? 'disabled' : '';
   showSheet(`
     <h3>${escapeHtml(e.codigo)} — ${escapeHtml(e.nombre||'')}</h3>
-    <div class="field"><label>Familia</label><input value="${escapeHtml(e.familia||'')}" id="f_familia"></div>
+    <div class="field"><label>Familia</label><input value="${escapeHtml(e.familia||'')}" id="f_familia" ${dis}></div>
     <div class="field"><label>Marca / Modelo</label><input value="${escapeHtml((e.marca||'')+' '+(e.modelo||''))}" id="f_marcamodelo" disabled></div>
-    <div class="field"><label>N° de serie</label><input value="${escapeHtml(e.numeroSerie||'')}" id="f_serie"></div>
+    <div class="field"><label>N° de serie</label><input value="${escapeHtml(e.numeroSerie||'')}" id="f_serie" ${dis}></div>
     <div class="field"><label>Estado físico</label>
-      <select id="f_estado">
+      <select id="f_estado" ${dis}>
         ${['Bueno','Malo','Repuesto'].map(o=>`<option ${e.estadoFisico===o?'selected':''}>${o}</option>`).join('')}
       </select>
     </div>
-    <div class="field"><label>Disponibilidad / ubicación</label><input value="${escapeHtml(e.disponibilidad||'')}" id="f_dispo"></div>
-    <div class="field"><label>Notas</label><textarea id="f_notas" rows="2">${escapeHtml(e.notaEstado||'')}</textarea></div>
+    <div class="field"><label>Disponibilidad / ubicación</label><input value="${escapeHtml(e.disponibilidad||'')}" id="f_dispo" ${dis}></div>
+    <div class="field"><label>Notas</label><textarea id="f_notas" rows="2" ${dis}>${escapeHtml(e.notaEstado||'')}</textarea></div>
+    ${soloLectura ? '' : `
     <div class="btn-row">
       <button class="btn primary" id="saveEqBtn">Guardar</button>
       <button class="btn ghost" id="movEqBtn">Nueva guía con este equipo</button>
-    </div>
+    </div>`}
     <h3 style="margin-top:18px;font-size:14px">Historial reciente</h3>
     <div id="eqHist">${historial.length ? historial.map(h=>`
       <div class="hist-item">
@@ -547,20 +608,22 @@ function openEquipoDetail(id){
       </div>`).join('') : '<div class="empty">Sin movimientos para este equipo</div>'}
     </div>
   `);
-  document.getElementById('saveEqBtn').onclick = async ()=>{
-    await db.collection('equipos').doc(id).update({
-      familia: document.getElementById('f_familia').value.trim(),
-      numeroSerie: document.getElementById('f_serie').value.trim(),
-      estadoFisico: document.getElementById('f_estado').value,
-      disponibilidad: document.getElementById('f_dispo').value.trim(),
-      notaEstado: document.getElementById('f_notas').value.trim(),
-      actualizadoPor: currentUser.nombre,
-      actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-    toast('Equipo actualizado');
-    closeSheet();
-  };
-  document.getElementById('movEqBtn').onclick = ()=>{ closeSheet(); openGuiaForm(e); };
+  if (!soloLectura){
+    document.getElementById('saveEqBtn').onclick = async ()=>{
+      await db.collection('equipos').doc(id).update({
+        familia: document.getElementById('f_familia').value.trim(),
+        numeroSerie: document.getElementById('f_serie').value.trim(),
+        estadoFisico: document.getElementById('f_estado').value,
+        disponibilidad: document.getElementById('f_dispo').value.trim(),
+        notaEstado: document.getElementById('f_notas').value.trim(),
+        actualizadoPor: currentUser.nombre,
+        actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      toast('Equipo actualizado');
+      closeSheet();
+    };
+    document.getElementById('movEqBtn').onclick = ()=>{ closeSheet(); openGuiaForm(e); };
+  }
 }
 
 /* ── FORM: nuevo equipo ──────────────────────────────────────────── */
